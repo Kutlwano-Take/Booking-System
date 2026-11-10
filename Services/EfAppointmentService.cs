@@ -12,8 +12,11 @@ public sealed class EfAppointmentService(PracticeBookingDbContext db, INotificat
 
     public bool IsAvailable(int practitionerId, DateTime startsAt, DateTime endsAt, int bufferMinutes, int? excludingId = null)
     {
-        if (endsAt <= startsAt || bufferMinutes < 0) return false;
+        if (endsAt <= startsAt || bufferMinutes < 0) 
+          return false;
+          
         var blockedUntil = endsAt.AddMinutes(bufferMinutes);
+        
         return !db.Appointments.Any(existing => existing.PractitionerId == practitionerId &&
             existing.Status != AppointmentStatus.Cancelled && existing.Id != excludingId &&
             startsAt < existing.EndsAt.AddMinutes(existing.BufferMinutes) && existing.StartsAt < blockedUntil);
@@ -36,8 +39,10 @@ public sealed class EfAppointmentService(PracticeBookingDbContext db, INotificat
         using var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
         if (!IsAvailable(request.PractitionerId, request.StartsAt, request.StartsAt.AddMinutes(request.DurationMinutes), request.BufferMinutes))
             return new(false, null, "Practitioner is already booked during this time (including buffer).");
+            
         var appointment = new Appointment { PatientId = request.PatientId, PractitionerId = request.PractitionerId, LocationId = request.LocationId,
             StartsAt = request.StartsAt, EndsAt = request.StartsAt.AddMinutes(request.DurationMinutes), BufferMinutes = request.BufferMinutes, Notes = request.Notes, Status = AppointmentStatus.Confirmed };
+        
         db.Appointments.Add(appointment); 
         db.SaveChanges(); 
         tx.Commit();
@@ -56,7 +61,9 @@ public sealed class EfAppointmentService(PracticeBookingDbContext db, INotificat
 
         if (string.IsNullOrWhiteSpace(reason)) 
             return new(false, appointment, "A cancellation reason is required.");
-        appointment.Status = AppointmentStatus.Cancelled; appointment.CancelledAt = DateTime.Now; db.SaveChanges();
+            
+        appointment.Status = AppointmentStatus.Cancelled; appointment.CancelledAt = DateTime.Now; 
+        db.SaveChanges();
         return new(true, appointment, null);
     }
 }
