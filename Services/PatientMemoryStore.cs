@@ -42,13 +42,10 @@ public sealed class PatientMemoryStore
 
     public Patient Add(Patient patient)
     {
-        // Let SQL Server generate the primary key.
         patient.Id = 0;
-
         _db.Patients.Add(patient);
         _db.SaveChanges();
-
-        // Generate a patient file number after SQL Server generates the ID.
+        
         if (string.IsNullOrWhiteSpace(patient.FileNumber))
         {
             patient.FileNumber = $"PT-{patient.Id}";
