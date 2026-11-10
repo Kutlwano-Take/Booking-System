@@ -1,6 +1,6 @@
-# Practice Booking System
+# Booking System
 
-This variant persists appointments in SQL Server using Entity Framework Core. The existing Razor Pages appointment UI and booking request models are retained. Lookup lists (patients, practitioners, locations) still come from the demo store in this starter; use the SQL script and seed rows before running the DB-backed booking flow.
+This variant persists appointments in SQL Server using Entity Framework Core. The existing Razor Pages appointment UI and booking request models are retained. Lookup lists (patients, practitioners, locations).
 
 ## Setup
 1. Update `ConnectionStrings:DefaultConnection` in `appsettings.json` for your SQL Server or LocalDB.
