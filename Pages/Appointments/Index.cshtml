@@ -1,0 +1,126 @@
+﻿@page
+@model PracticeBookingSystem.Pages.Appointments.IndexModel
+@{
+}
+@{
+    ViewData["Title"] = "Appointments";
+    var appointments = Model.DayAppointments;
+    var selectedDate = Model.SelectedDate;
+}
+<link rel="stylesheet" href="~/css/appointments.css" asp-append-version="true" />
+
+<div class="workspace">
+    <aside class="sidebar">
+        <div class="brand"><span class="brand-icon">✚</span><span><b>NetPractice</b><small>Practice management</small></span></div>
+        <div class="practice-chip"><b>EAR LANGUAGE SPEECH</b><small>Practice workspace</small></div>
+        <nav class="side-nav">
+            <a asp-page="/Index">⌂ <span>Overview</span></a>
+            <a class="active" asp-page="/Appointments/Index">▦ <span>Appointments</span></a>
+            <a asp-page="/Patients/Index">♧ <span>Patients</span></a>
+            <a href="#">▤ <span>Reports</span></a>
+            <a href="#">⚙ <span>Settings</span></a>
+        </nav>
+        <partial name="_SidebarUser" />
+    </aside>
+
+    <main class="main-area">
+        <header class="topbar">
+            <div><span class="eyebrow">WORKSPACE / SCHEDULE</span><h3>Appointments</h3></div>
+            <div class="top-actions"><span class="today-label">@selectedDate.ToString("dddd, dd MMMM yyyy")</span><button type="button" class="primary-button" data-open-modal>＋ New appointment</button></div>
+        </header>
+
+        @if (TempData["Message"] is string message)
+        {
+            <div class="notice">✓ @message</div>
+        }
+        <section class="summary-grid">
+            <div class="summary-card"><span>Appointments</span><strong>@appointments.Count(a => a.Status != AppointmentStatus.Cancelled)</strong><small>Scheduled for selected day</small></div>
+            <div class="summary-card"><span>Confirmed</span><strong>@appointments.Count(a => a.Status == AppointmentStatus.Confirmed)</strong><small>Bookings confirmed</small></div>
+            <div class="summary-card"><span>Cancelled</span><strong>@appointments.Count(a => a.Status == AppointmentStatus.Cancelled)</strong><small>Released time slots</small></div>
+            <div class="summary-card"><span>Locations</span><strong>@Model.Locations.Count</strong><small>Practice locations</small></div>
+        </section>
+
+        <section class="content-card">
+            <div class="section-head">
+                <div><h2>Daily schedule</h2><p>Review bookings and manage your day.</p></div>
+                <div class="date-controls"><a class="icon-button" href="?date=@selectedDate.AddDays(-1).ToString("yyyy-MM-dd")" aria-label="Previous day">‹</a><input id="scheduleDate" type="date" value="@selectedDate.ToString("yyyy-MM-dd")" /><a class="icon-button" href="?date=@selectedDate.AddDays(1).ToString("yyyy-MM-dd")" aria-label="Next day">›</a></div>
+            </div>
+            @if (appointments.Count == 0)
+            {
+                <div class="empty-state"><div class="empty-icon">▦</div><h3>Your schedule is clear</h3><p>There are no appointments on this date. Add a booking to get started.</p><button type="button" class="primary-button" data-open-modal>＋ Create appointment</button></div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="appointment-table">
+                        <thead><tr><th>TIME</th><th>PATIENT</th><th>PRACTITIONER</th><th>LOCATION</th><th>STATUS</th><th>ACTION</th></tr></thead>
+                        <tbody>
+                            @foreach (var appointment in appointments.OrderBy(a => a.StartsAt))
+                            {
+                                var patient = Model.Patients.FirstOrDefault(p => p.Id == appointment.PatientId);
+                                var practitioner = Model.Practitioners.FirstOrDefault(p => p.Id == appointment.PractitionerId);
+                                var location = Model.Locations.FirstOrDefault(l => l.Id == appointment.LocationId);
+                                <tr>
+                                    <td><b>@appointment.StartsAt.ToString("HH:mm")</b><small>to @appointment.EndsAt.ToString("HH:mm")</small></td>
+                                    <td><b>@patient?.FullName</b><small>File: @patient?.FileNumber</small></td>
+                                    <td>@practitioner?.FullName</td>
+                                    <td>@location?.Name</td>
+                                    <td><span class="status-pill @(appointment.Status == AppointmentStatus.Cancelled ? "cancelled" : "confirmed")">@appointment.Status</span></td>
+                                    <td>@if (appointment.Status != AppointmentStatus.Cancelled) {
+                                        <form method="post" asp-page-handler="Cancel" class="cancel-form"><input type="hidden" name="CancelId" value="@appointment.Id" /><input name="CancelReason" placeholder="Cancellation reason" required /><button class="text-button" type="submit">Cancel</button></form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+    <div class="footnote">Practice workspace · Appointment data is loaded from the configured data service.</div>
+</main>
+</div>
+
+<div class="modal-backdrop" id="appointmentModal" aria-hidden="true">
+    <section class="booking-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <header class="modal-head"><div><span class="eyebrow">NEW BOOKING</span><h2 id="modalTitle">Create appointment</h2><p>Enter the details below to reserve a time.</p></div><button type="button" class="modal-close" data-close-modal aria-label="Close">×</button></header>
+        <form method="post" asp-page-handler="Book" class="modal-form">
+            <div asp-validation-summary="All" class="validation"></div>
+            <div class="form-grid">
+                <label class="field full">Patient<select asp-for="Booking.PatientId" required><option value="">Select patient</option>@foreach (var p in Model.Patients) {
+                    <option value="@p.Id">@p.FullName · @p.FileNumber</option>
+                }
+            </select></label>
+            <label class="field">Practitioner<select asp-for="Booking.PractitionerId" required><option value="">Select practitioner</option>@foreach (var p in Model.Practitioners) {
+                <option value="@p.Id">@p.FullName</option>
+            }
+        </select></label>
+        <label class="field">Practice location<select asp-for="Booking.LocationId" required><option value="">Select location</option>@foreach (var l in Model.Locations) {
+            <option value="@l.Id">@l.Name</option>
+        }
+    </select></label>
+    <label class="field">Date and time<input asp-for="Booking.StartsAt" type="datetime-local" required /></label>
+    <label class="field">Duration (minutes)<input asp-for="Booking.DurationMinutes" type="number" min="5" max="480" required /></label>
+    <label class="field">Buffer after booking (minutes)<input asp-for="Booking.BufferMinutes" type="number" min="0" max="180" required /></label>
+    <label class="field full">Notes<textarea asp-for="Booking.Notes" rows="3" placeholder="Optional details for this appointment"></textarea></label>
+</div>
+<footer class="modal-footer"><button type="button" class="secondary-button" data-close-modal>Cancel</button><button type="submit" class="primary-button">Confirm appointment</button></footer>
+</form>
+</section>
+</div>
+
+<script>
+    (() => {
+        const modal = document.getElementById('appointmentModal');
+        if (!modal) return;
+        const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; };
+        const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
+        document.querySelectorAll('[data-open-modal]').forEach(button => button.addEventListener('click', open));
+        modal.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', close));
+        modal.addEventListener('click', event => { if (event.target === modal) close(); });
+        document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+        if (modal.querySelector('.validation')?.textContent.trim()) open();
+        const date = document.getElementById('scheduleDate');
+        date?.addEventListener('change', () => { if (date.value) location.href = '?date=' + encodeURIComponent(date.value); });
+    })();
+</script>

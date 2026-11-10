@@ -1,0 +1,12 @@
+﻿@using PracticeBookingSystem.Services
+
+<div class="sidebar-bottom">
+    <span class="avatar">@User.Initials()</span>
+    <div>
+        <b>@User.DisplayName()</b>
+        <small>@User.JobTitle()</small>
+    </div>
+    <form method="post" asp-page="/Account/Logout" class="logout-form">
+        <button type="submit" class="logout-btn" title="Sign out">⎋</button>
+    </form>
+</div>

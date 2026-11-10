@@ -1,0 +1,105 @@
+﻿@page "{id:int}"
+
+@model PracticeBookingSystem.Pages.Patients.HistoryModel
+@{
+}
+@{
+    ViewData["Title"] = "Patient history";
+}
+<link rel="stylesheet" href="~/css/patients.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/appointments.css" asp-append-version="true" />
+<div class="workspace">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-icon">✚</span>
+            <span>
+                <b>NetPractice</b>
+                <small>Practice management</small>
+            </span>
+        </div>
+
+        <div class="practice-chip">
+            <b>EAR LANGUAGE SPEECH</b>
+            <small>Practice workspace</small>
+        </div>
+
+        <nav class="side-nav">
+            <a asp-page="/Index">⌂ <span>Overview</span></a>
+            <a asp-page="/Appointments/Index">▦ <span>Appointments</span></a>
+            <a class="active" asp-page="/Patients/Index">♧ <span>Patients</span></a>
+            <a href="#">▤ <span>Reports</span></a>
+            <a href="#">⚙ <span>Settings</span></a>
+        </nav>
+
+        <partial name="_SidebarUser" />
+    </aside>
+
+    <main class="main-area">
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">PATIENTS / PROFILE / HISTORY</span>
+                <h4>@Model.Patient?.FullName</h4>
+                <p class="patient-meta">
+                    Patient ID: PT-@Model.Patient?.Id · @Model.Patient?.Email · @Model.Patient?.Phone
+                </p>
+            </div>
+
+            <div class="top-actions">
+                <a class="secondary-button" asp-page="/Patients/Index">← Back to patients</a>
+                <a class="primary-button" asp-page="/Appointments/Index">＋ New appointment</a>
+            </div>
+        </header>
+
+        <section class="content-card">
+            <div class="section-head">
+                <div>
+                    <h2>Appointment history</h2>
+                    <p>Previous and upcoming appointments for this patient.</p>
+                </div>
+            </div>
+
+            @if (Model.History.Count == 0)
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">▦</div>
+                    <h3>No appointment history yet</h3>
+                    <p>Appointments for this patient will appear here.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="appointment-table">
+                        <thead>
+                            <tr>
+                                <th>DATE</th>
+                                <th>TIME</th>
+                                <th>PRACTITIONER</th>
+                                <th>LOCATION</th>
+                                <th>STATUS</th>
+                                <th>NOTES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.History.OrderByDescending(x => x.StartsAt))
+                            {
+                                <tr>
+                                    <td>@item.StartsAt.ToString("dd MMM yyyy")</td>
+                                    <td>@item.StartsAt.ToString("HH:mm") – @item.EndsAt.ToString("HH:mm")</td>
+                                    <td>@Model.Practitioners.FirstOrDefault(x => x.Id == item.PractitionerId)?.FullName</td>
+                                    <td>@Model.Locations.FirstOrDefault(x => x.Id == item.LocationId)?.Name</td>
+                                    <td>
+                                        <span class="status-pill @(item.Status == PracticeBookingSystem.Models.AppointmentStatus.Cancelled ? "cancelled" : "confirmed")">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td>@item.Notes</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </main>
+</div>

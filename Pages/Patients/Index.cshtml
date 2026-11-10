@@ -1,0 +1,136 @@
+﻿@page
+@model PracticeBookingSystem.Pages.Patients.IndexModel
+@{
+}
+<link rel="stylesheet" href="~/css/patients.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/appointments.css" asp-append-version="true" />
+<div class="workspace">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-icon">✚</span>
+            <span>
+                <b>NetPractice</b>
+                <small>Practice management</small>
+            </span>
+        </div>
+
+        <div class="practice-chip">
+            <b>EAR LANGUAGE SPEECH</b>
+            <small>Practice workspace</small>
+        </div>
+
+        <nav class="side-nav">
+            <a asp-page="/Index">⌂ <span>Overview</span></a>
+            <a asp-page="/Appointments/Index">▦ <span>Appointments</span></a>
+            <a class="active" asp-page="/Patients/Index">♧ <span>Patients</span></a>
+            <a href="#">▤ <span>Reports</span></a>
+            <a href="#">⚙ <span>Settings</span></a>
+        </nav>
+
+        <partial name="_SidebarUser" />
+    </aside>
+
+    <main class="main-area">
+        <div class="patients-page">
+            <header class="patients-head">
+                <div>
+                    <span class="eyebrow">PRACTICE MANAGEMENT</span>
+                    <h1>Patients</h1>
+                    <p>Manage patient profiles and review their appointment history.</p>
+                </div>
+                <button type="button" class="primary" onclick="document.getElementById('patientModal').showModal()">
+                    + Add patient
+                </button>
+            </header>
+
+            <form method="get" class="search-row">
+                <input name="Search" value="@Model.Search" placeholder="Search name, email or patient ID" />
+                <button class="secondary">Search</button>
+            </form>
+
+            <section class="patient-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Patient ID</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Medical aid</th>
+                            <th>History</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var patient in Model.Patients)
+                        {
+                            <tr>
+                                <td><strong>@patient.FullName</strong></td>
+                                <td>PT-@patient.Id</td>
+                                <td>@patient.Email</td>
+                                <td>@patient.Phone</td>
+                                <td>@patient.MedicalAid</td>
+                                <td>
+                                    <a asp-page="/Patients/History" asp-route-id="@patient.Id">View history</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <div class="footnote">Practice workspace · Appointment data is loaded from the configured data service.</div>
+    </main>
+</div>
+
+<dialog id="patientModal" class="patient-modal">
+    <form method="post" asp-page-handler="Create">
+        <header>
+            <div>
+                <h2>Add patient</h2>
+                <p>Create a patient profile.</p>
+            </div>
+            <button type="button" class="close" onclick="document.getElementById('patientModal').close()">×</button>
+        </header>
+
+        <div class="form-grid">
+            <label>
+                Full name
+                <input asp-for="NewPatient.FullName" required />
+            </label>
+            <label>
+                Email
+                <input asp-for="NewPatient.Email" type="email" required />
+            </label>
+            <label>
+                Phone
+                <input asp-for="NewPatient.Phone" />
+            </label>
+            <label>
+                Identity number
+                <input asp-for="NewPatient.IdentityNumber" />
+            </label>
+            <label>
+                File number
+                <input asp-for="NewPatient.FileNumber" />
+            </label>
+            <label>
+                Medical aid
+                <input asp-for="NewPatient.MedicalAid" />
+            </label>
+            <label>
+                Date of birth
+                <input asp-for="NewPatient.DateOfBirth" type="date" />
+            </label>
+            <label class="wide">
+                Notes
+                <textarea asp-for="NewPatient.Notes" rows="3"></textarea>
+            </label>
+        </div>
+
+        <footer>
+            <button type="button" class="secondary" onclick="document.getElementById('patientModal').close()">Cancel</button>
+            <button class="primary" type="submit">Save patient</button>
+        </footer>
+    </form>
+</dialog>

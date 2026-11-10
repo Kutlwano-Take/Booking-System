@@ -1,0 +1,44 @@
+@page
+@model PracticeBookingSystem.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign in";
+    Layout = "_Layout";
+}
+<div class="login-page">
+    <aside class="login-brand">
+        <div class="brand-mark"><span class="brand-symbol">◉</span><span><b>NETPRACTICE</b><small>Integrated Practice Services</small></span></div>
+        <section class="welcome">
+            <h1>Welcome back.</h1>
+            <p>Sign in to capture visits, send claims and follow every response through to payment.</p>
+        </section>
+        <div class="login-benefits">
+            <p>✓ &nbsp; No card needed. You are billed only for claims you send.</p>
+            <p>✓ &nbsp; POPIA operator agreement in place before any patient data is entered.</p>
+            <p>✓ &nbsp; Practice numbers verified against the BHF register.</p>
+        </div>
+    </aside>
+    <main class="login-main">
+        <a class="create-account" href="#">New here? <b>Create account</b></a>
+        <div class="login-form-wrap">
+            <h2>Sign in</h2>
+            <p class="muted">Use your email address or username and your password.</p>
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="validation"></div>
+                <label asp-for="Input.Username"></label>
+                <input asp-for="Input.Username" placeholder="Enter your email or username" autocomplete="username" />
+                <span asp-validation-for="Input.Username" class="validation"></span>
+                <label asp-for="Input.Password"></label>
+                <div class="password-field"><input asp-for="Input.Password" placeholder="Enter password" autocomplete="current-password" /><button type="button" class="eye-button" data-toggle-password aria-label="Show password">◉</button></div>
+                <span asp-validation-for="Input.Password" class="validation"></span>
+                <div class="login-options"><label class="remember"><input asp-for="Input.RememberMe" /> Remember my email on this computer</label><a asp-page="/Account/ForgotPassword">Forgot password?</a></div>
+                <button class="primary-button full" type="submit">Sign in</button>
+            </form>
+            <div class="or-divider"><span>OR</span></div>
+            <button class="social-button" type="button"><strong class="google">G</strong> Continue with Google</button>
+            <button class="social-button apple" type="button"><strong>●</strong> Continue with Apple</button>
+            <p class="old-link">Still on the old NetPractice? <a href="#">Sign in at secure.netpractice.co.za</a></p>
+        </div>
+        <footer class="login-footer"><a href="#">Terms of Service</a><a href="#">Privacy Policy</a><a href="#">Operator Agreement</a></footer>
+    </main>
+</div>
